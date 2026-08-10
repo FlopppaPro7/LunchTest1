@@ -31,19 +31,19 @@ export class GraphController {
   private lastLayout: LayoutId = "hierarchical";
 
   constructor(container: HTMLElement, private cb: GraphCallbacks) {
-    // Touch devices keep one-finger panning; on desktop, left-drag no longer
-    // pans the view — left-click selects, and panning is done with the middle
-    // mouse button (see setupMiddleMousePan).
+    // Panning must stay enabled for the mouse wheel to zoom (Cytoscape couples
+    // the two) and for one-finger touch panning. We instead suppress *left*-drag
+    // panning on desktop below, so left-click is reserved for selection while
+    // the middle mouse button pans and the wheel zooms.
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
 
     this.cy = cytoscape({
       container,
       style: buildStylesheet(),
-      wheelSensitivity: 0.2,
       minZoom: 0.05,
       maxZoom: 4,
       pixelRatio: 1, // canvas renderer scales fine; keeps large graphs fast
-      userPanningEnabled: coarsePointer,
+      userPanningEnabled: true,
       boxSelectionEnabled: false,
     });
 
@@ -53,40 +53,51 @@ export class GraphController {
       if (e.target === this.cy) this.cb.onBackground();
     });
 
-    this.setupMiddleMousePan(container);
+    this.setupPointerControls(container, coarsePointer);
   }
 
   /**
-   * Middle-mouse-button panning: hold the middle button and drag to move the
-   * view. Works regardless of the userPanningEnabled setting, so left-click
-   * stays reserved for selection on desktop.
+   * Desktop pointer controls:
+   *   - middle button + drag  → pan the view
+   *   - left button           → select (its drag-pan is suppressed so a stray
+   *                             drag doesn't move the whole graph)
+   *   - wheel                 → zoom (Cytoscape default, needs panning enabled)
+   * Touch devices are left untouched so one-finger panning keeps working.
    */
-  private setupMiddleMousePan(container: HTMLElement): void {
-    let panning = false;
+  private setupPointerControls(container: HTMLElement, coarsePointer: boolean): void {
+    let midPanning = false;
     let last = { x: 0, y: 0 };
 
     const onDown = (e: MouseEvent) => {
-      if (e.button !== 1) return; // middle button only
-      e.preventDefault();
-      panning = true;
-      last = { x: e.clientX, y: e.clientY };
-      container.style.cursor = "grabbing";
+      if (e.button === 1) {
+        // Middle button: pan.
+        e.preventDefault();
+        midPanning = true;
+        last = { x: e.clientX, y: e.clientY };
+        container.style.cursor = "grabbing";
+      } else if (e.button === 0 && !coarsePointer) {
+        // Left button on desktop: turn off view panning for this drag so it
+        // doesn't drag the whole graph — selection/node-drag still work.
+        this.cy.userPanningEnabled(false);
+      }
     };
     const onMove = (e: MouseEvent) => {
-      if (!panning) return;
+      if (!midPanning) return;
       const dx = e.clientX - last.x;
       const dy = e.clientY - last.y;
       last = { x: e.clientX, y: e.clientY };
       this.cy.panBy({ x: dx, y: dy });
     };
     const stop = () => {
-      if (!panning) return;
-      panning = false;
-      container.style.cursor = "";
+      if (midPanning) {
+        midPanning = false;
+        container.style.cursor = "";
+      }
+      // Restore panning so the wheel can zoom again.
+      if (!coarsePointer) this.cy.userPanningEnabled(true);
     };
 
-    // Capture phase so we intercept the middle-button press before Cytoscape's
-    // own canvas listeners can consume it.
+    // Capture phase so we set panning state before Cytoscape's own handlers run.
     container.addEventListener("mousedown", onDown, true);
     window.addEventListener("mousemove", onMove, true);
     window.addEventListener("mouseup", stop, true);
