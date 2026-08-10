@@ -85,13 +85,19 @@ export class GraphController {
       container.style.cursor = "";
     };
 
-    container.addEventListener("mousedown", onDown);
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", stop);
+    // Capture phase so we intercept the middle-button press before Cytoscape's
+    // own canvas listeners can consume it.
+    container.addEventListener("mousedown", onDown, true);
+    window.addEventListener("mousemove", onMove, true);
+    window.addEventListener("mouseup", stop, true);
     // Suppress the browser's middle-click auxiliary action (autoscroll).
-    container.addEventListener("auxclick", (e) => {
-      if (e.button === 1) e.preventDefault();
-    });
+    container.addEventListener(
+      "auxclick",
+      (e) => {
+        if (e.button === 1) e.preventDefault();
+      },
+      true
+    );
   }
 
   setModel(model: ProjectModel): void {
