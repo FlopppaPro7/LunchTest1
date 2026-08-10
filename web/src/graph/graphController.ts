@@ -31,6 +31,11 @@ export class GraphController {
   private lastLayout: LayoutId = "hierarchical";
 
   constructor(container: HTMLElement, private cb: GraphCallbacks) {
+    // Touch devices keep one-finger panning; on desktop, left-drag no longer
+    // pans the view — left-click selects, and panning is done with the middle
+    // mouse button (see setupMiddleMousePan).
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+
     this.cy = cytoscape({
       container,
       style: buildStylesheet(),
@@ -38,12 +43,54 @@ export class GraphController {
       minZoom: 0.05,
       maxZoom: 4,
       pixelRatio: 1, // canvas renderer scales fine; keeps large graphs fast
+      userPanningEnabled: coarsePointer,
+      boxSelectionEnabled: false,
     });
 
     this.cy.on("tap", "node", (e) => this.cb.onNodeSelect(e.target.id()));
     this.cy.on("tap", "edge", (e) => this.cb.onEdgeSelect(e.target.id()));
     this.cy.on("tap", (e) => {
       if (e.target === this.cy) this.cb.onBackground();
+    });
+
+    this.setupMiddleMousePan(container);
+  }
+
+  /**
+   * Middle-mouse-button panning: hold the middle button and drag to move the
+   * view. Works regardless of the userPanningEnabled setting, so left-click
+   * stays reserved for selection on desktop.
+   */
+  private setupMiddleMousePan(container: HTMLElement): void {
+    let panning = false;
+    let last = { x: 0, y: 0 };
+
+    const onDown = (e: MouseEvent) => {
+      if (e.button !== 1) return; // middle button only
+      e.preventDefault();
+      panning = true;
+      last = { x: e.clientX, y: e.clientY };
+      container.style.cursor = "grabbing";
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!panning) return;
+      const dx = e.clientX - last.x;
+      const dy = e.clientY - last.y;
+      last = { x: e.clientX, y: e.clientY };
+      this.cy.panBy({ x: dx, y: dy });
+    };
+    const stop = () => {
+      if (!panning) return;
+      panning = false;
+      container.style.cursor = "";
+    };
+
+    container.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", stop);
+    // Suppress the browser's middle-click auxiliary action (autoscroll).
+    container.addEventListener("auxclick", (e) => {
+      if (e.button === 1) e.preventDefault();
     });
   }
 
