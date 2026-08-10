@@ -1,0 +1,82 @@
+{
+  "format": "rbxflow",
+  "version": 1,
+  "project": {
+    "name": "SkirmishArena",
+    "generatedAt": "2026-08-10T00:00:00Z",
+    "placeId": "1234567890",
+    "gameId": "987654321",
+    "scanner": { "name": "Game Flow Scanner", "version": "1.0.0" }
+  },
+  "instances": [
+    { "id": "instance_sss", "name": "ServerScriptService", "className": "ServerScriptService", "path": "ServerScriptService", "parentId": null },
+    { "id": "instance_services", "name": "Services", "className": "Folder", "path": "ServerScriptService.Services", "parentId": "instance_sss" },
+    { "id": "instance_rep", "name": "ReplicatedStorage", "className": "ReplicatedStorage", "path": "ReplicatedStorage", "parentId": null },
+    { "id": "instance_modules", "name": "Modules", "className": "Folder", "path": "ReplicatedStorage.Modules", "parentId": "instance_rep" },
+    { "id": "instance_remotes", "name": "Remotes", "className": "Folder", "path": "ReplicatedStorage.Remotes", "parentId": "instance_rep" },
+    { "id": "instance_starterplayer", "name": "StarterPlayerScripts", "className": "StarterPlayerScripts", "path": "StarterPlayer.StarterPlayerScripts", "parentId": null },
+    { "id": "instance_controllers", "name": "Controllers", "className": "Folder", "path": "StarterPlayer.StarterPlayerScripts.Controllers", "parentId": "instance_starterplayer" },
+    { "id": "instance_workspace", "name": "Workspace", "className": "Workspace", "path": "Workspace", "parentId": null },
+    { "id": "instance_map", "name": "Map", "className": "Model", "path": "Workspace.Map", "parentId": "instance_workspace", "attributes": { "Version": 3 } },
+    { "id": "instance_door", "name": "Door", "className": "Part", "path": "Workspace.Map.Door", "parentId": "instance_map" }
+  ],
+  "scripts": [
+    { "id": "script_gamecontroller", "name": "GameController", "className": "Script", "path": "ServerScriptService.GameController", "parentId": "instance_sss", "environment": "server", "functions": ["Start", "OnPlayerAdded"] },
+    { "id": "script_playerservice", "name": "PlayerService", "className": "ModuleScript", "path": "ServerScriptService.Services.PlayerService", "parentId": "instance_services", "environment": "server", "functions": ["GetProfile", "AddKill", "Spawn"] },
+    { "id": "script_weaponservice", "name": "WeaponService", "className": "ModuleScript", "path": "ServerScriptService.Services.WeaponService", "parentId": "instance_services", "environment": "server", "functions": ["Fire", "Reload", "Equip", "GetConfig"] },
+    { "id": "script_damageservice", "name": "DamageService", "className": "ModuleScript", "path": "ServerScriptService.Services.DamageService", "parentId": "instance_services", "environment": "server", "functions": ["ApplyDamage", "Kill"] },
+    { "id": "script_roundservice", "name": "RoundService", "className": "ModuleScript", "path": "ServerScriptService.Services.RoundService", "parentId": "instance_services", "environment": "server", "functions": ["StartRound", "EndRound"] },
+    { "id": "script_weaponconfig", "name": "WeaponConfig", "className": "ModuleScript", "path": "ReplicatedStorage.Modules.WeaponConfig", "parentId": "instance_modules", "environment": "shared", "functions": ["Get"] },
+    { "id": "script_utility", "name": "Utility", "className": "ModuleScript", "path": "ReplicatedStorage.Modules.Utility", "parentId": "instance_modules", "environment": "shared", "functions": ["Lerp", "Clamp", "Round"] },
+    { "id": "script_playercontroller", "name": "PlayerController", "className": "LocalScript", "path": "StarterPlayer.StarterPlayerScripts.Controllers.PlayerController", "parentId": "instance_controllers", "environment": "client", "functions": ["Init"] },
+    { "id": "script_weaponcontroller", "name": "WeaponController", "className": "LocalScript", "path": "StarterPlayer.StarterPlayerScripts.Controllers.WeaponController", "parentId": "instance_controllers", "environment": "client", "functions": ["Init", "OnMouseDown", "PlayReloadAnim"] }
+  ],
+  "remotes": [
+    { "id": "remote_fireweapon", "name": "FireWeapon", "className": "RemoteEvent", "path": "ReplicatedStorage.Remotes.FireWeapon", "parentId": "instance_remotes" },
+    { "id": "remote_reload", "name": "Reload", "className": "RemoteEvent", "path": "ReplicatedStorage.Remotes.Reload", "parentId": "instance_remotes" },
+    { "id": "remote_getloadout", "name": "GetLoadout", "className": "RemoteFunction", "path": "ReplicatedStorage.Remotes.GetLoadout", "parentId": "instance_remotes" },
+    { "id": "remote_damagesignal", "name": "DamageSignal", "className": "BindableEvent", "path": "ServerScriptService.Services.DamageSignal", "parentId": "instance_services" }
+  ],
+  "events": [
+    { "id": "event_fireweapon_server", "name": "OnServerEvent", "remoteId": "remote_fireweapon", "path": "ReplicatedStorage.Remotes.FireWeapon.OnServerEvent" },
+    { "id": "event_reload_server", "name": "OnServerEvent", "remoteId": "remote_reload", "path": "ReplicatedStorage.Remotes.Reload.OnServerEvent" }
+  ],
+  "functions": [
+    { "id": "function_applydamage", "name": "ApplyDamage", "scriptId": "script_damageservice", "line": 12 },
+    { "id": "function_fire", "name": "Fire", "scriptId": "script_weaponservice", "line": 30 }
+  ],
+  "relationships": [
+    { "id": "rel_0001", "from": "script_gamecontroller", "to": "script_playerservice", "type": "require", "line": 3, "snippet": "local PlayerService = require(script.Parent.Services.PlayerService)", "confidence": "high" },
+    { "id": "rel_0002", "from": "script_gamecontroller", "to": "script_roundservice", "type": "require", "line": 4, "snippet": "local RoundService = require(script.Parent.Services.RoundService)", "confidence": "high" },
+    { "id": "rel_0003", "from": "script_gamecontroller", "to": "script_weaponservice", "type": "require", "line": 5, "snippet": "local WeaponService = require(script.Parent.Services.WeaponService)", "confidence": "high" },
+    { "id": "rel_0004", "from": "script_weaponservice", "to": "script_damageservice", "type": "require", "line": 18, "snippet": "local DamageService = require(script.Parent.DamageService)", "confidence": "high" },
+    { "id": "rel_0005", "from": "script_weaponservice", "to": "script_weaponconfig", "type": "require", "line": 19, "snippet": "local WeaponConfig = require(ReplicatedStorage.Modules.WeaponConfig)", "confidence": "high" },
+    { "id": "rel_0006", "from": "script_damageservice", "to": "script_playerservice", "type": "require", "line": 6, "snippet": "local PlayerService = require(script.Parent.PlayerService)", "confidence": "high" },
+    { "id": "rel_0007", "from": "script_roundservice", "to": "script_playerservice", "type": "require", "line": 7, "snippet": "local PlayerService = require(script.Parent.PlayerService)", "confidence": "high" },
+    { "id": "rel_0008", "from": "script_weaponconfig", "to": "script_utility", "type": "require", "line": 2, "snippet": "local Utility = require(script.Parent.Utility)", "confidence": "high" },
+    { "id": "rel_0009", "from": "script_playercontroller", "to": "script_weaponcontroller", "type": "require", "line": 4, "snippet": "local WeaponController = require(script.Parent.WeaponController)", "confidence": "high" },
+    { "id": "rel_0010", "from": "script_weaponcontroller", "to": "script_weaponconfig", "type": "require", "line": 3, "snippet": "local WeaponConfig = require(ReplicatedStorage.Modules.WeaponConfig)", "confidence": "high" },
+
+    { "id": "rel_0011", "from": "script_weaponcontroller", "to": "remote_fireweapon", "type": "fires_server", "line": 22, "snippet": "FireWeapon:FireServer(target, origin)", "confidence": "high", "meta": { "direction": "client_to_server" } },
+    { "id": "rel_0012", "from": "script_weaponcontroller", "to": "remote_reload", "type": "fires_server", "line": 40, "snippet": "Reload:FireServer()", "confidence": "high", "meta": { "direction": "client_to_server" } },
+    { "id": "rel_0013", "from": "script_weaponservice", "to": "remote_fireweapon", "type": "server_event", "line": 24, "snippet": "FireWeapon.OnServerEvent:Connect(function(player, target) ... end)", "confidence": "high", "meta": { "direction": "client_to_server" } },
+    { "id": "rel_0014", "from": "script_weaponservice", "to": "remote_reload", "type": "server_event", "line": 55, "snippet": "Reload.OnServerEvent:Connect(function(player) ... end)", "confidence": "high", "meta": { "direction": "client_to_server" } },
+    { "id": "rel_0015", "from": "script_weaponcontroller", "to": "remote_getloadout", "type": "invokes_server", "line": 10, "snippet": "local loadout = GetLoadout:InvokeServer()", "confidence": "high", "meta": { "direction": "client_to_server" } },
+    { "id": "rel_0016", "from": "script_playerservice", "to": "remote_getloadout", "type": "invokes_server", "line": 15, "snippet": "GetLoadout.OnServerInvoke = function(player) ... end", "confidence": "medium", "meta": { "direction": "client_to_server" } },
+
+    { "id": "rel_0017", "from": "script_weaponservice", "to": "function_applydamage", "type": "function_call", "line": 33, "snippet": "DamageService.ApplyDamage(target, dmg)", "confidence": "high" },
+    { "id": "rel_0018", "from": "script_damageservice", "to": "script_playerservice", "type": "function_call", "line": 20, "snippet": "PlayerService.AddKill(killer)", "confidence": "medium" },
+    { "id": "rel_0019", "from": "script_damageservice", "to": "remote_damagesignal", "type": "event_connection", "line": 8, "snippet": "DamageSignal.Event:Connect(onDamage)", "confidence": "high" },
+
+    { "id": "rel_0020", "from": "script_weaponservice", "to": "instance_door", "type": "instance_reference", "line": 48, "snippet": "local door = workspace.Map.Door", "confidence": "medium" },
+    { "id": "rel_0021", "from": "script_roundservice", "to": "instance_map", "type": "attribute_read", "line": 12, "snippet": "local v = workspace.Map:GetAttribute(\"Version\")", "confidence": "high", "meta": { "attribute": "Version" } },
+    { "id": "rel_0022", "from": "script_roundservice", "to": "instance_map", "type": "attribute_write", "line": 30, "snippet": "workspace.Map:SetAttribute(\"Round\", n)", "confidence": "high", "meta": { "attribute": "Round" } },
+    { "id": "rel_0023", "from": "script_playercontroller", "to": "instance_door", "type": "instance_reference", "line": 8, "snippet": "local door = script.Parent", "confidence": "low" }
+  ],
+  "warnings": [
+    { "id": "warn_001", "type": "dynamic_reference", "scriptId": "script_playercontroller", "line": 8, "message": "Could not statically determine referenced Instance (dynamic path)." },
+    { "id": "warn_002", "type": "unresolved_require", "scriptId": "script_damageservice", "line": 20, "message": "require target resolved to a variable; call relationship marked medium confidence." },
+    { "id": "warn_003", "type": "unknown_relationship", "scriptId": "script_playerservice", "line": 15, "message": "OnServerInvoke handler owner inferred; verify receiver." }
+  ],
+  "runtime": { "executions": [], "events": [], "timings": [] }
+}

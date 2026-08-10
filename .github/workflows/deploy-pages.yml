@@ -1,0 +1,67 @@
+name: Deploy RBXFlow web app to GitHub Pages
+
+# Publishes web/ as a static site to GitHub Pages.
+#
+# This runs on manual dispatch only (not on every push) because the very first
+# deploy needs a one-time repo setting that the Actions token cannot set itself:
+#
+#   1. Settings → Pages → Build and deployment → Source: "GitHub Actions".
+#   2. Then run this workflow: Actions tab → "Deploy RBXFlow web app to GitHub
+#      Pages" → "Run workflow" (or trigger it via the API / gh).
+#
+# After Pages is enabled you can, if you like, add a `push:` trigger back so it
+# redeploys automatically on every change.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+
+      # Keep the in-app sample in sync with the canonical fixture.
+      - name: Sync sample fixture
+        run: cp fixtures/sample-game.rbxflow.json web/public/sample-game.rbxflow.json
+
+      - name: Build
+        working-directory: web
+        run: npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
