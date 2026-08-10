@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RBXFlow — Roblox Game Flow Visualizer</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1117'/%3E%3Ccircle cx='9' cy='16' r='3' fill='%234c9aff'/%3E%3Ccircle cx='23' cy='9' r='3' fill='%238b7dff'/%3E%3Ccircle cx='23' cy='23' r='3' fill='%2357c98b'/%3E%3Cpath d='M11.5 15 21 10M11.5 17 21 22' stroke='%237d8896' stroke-width='1.5'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Top bar ------------------------------------------------------- -->
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <span class="brand-name">RBXFlow</span>
+          <span class="brand-sub" id="projectName"></span>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btnOpen">Open Project</button>
+          <div class="search-wrap">
+            <input id="searchInput" class="search-input" type="text" placeholder="Search scripts, remotes, paths…" autocomplete="off" />
+            <div id="searchResults" class="search-results"></div>
+          </div>
+          <label class="field">
+            <span class="field-label">Layout</span>
+            <select id="layoutSelect" class="select"></select>
+          </label>
+          <button class="btn btn-ghost" id="btnFilters">Filters</button>
+          <button class="btn btn-ghost" id="btnFit" title="Fit to screen">Fit</button>
+          <button class="btn btn-ghost" id="btnReset" title="Reset view">Reset</button>
+          <div class="menu-wrap">
+            <button class="btn btn-ghost" id="btnExport">Export ▾</button>
+            <div class="menu" id="exportMenu">
+              <button data-export="json">Filtered JSON</button>
+              <button data-export="png">Image (PNG)</button>
+              <button data-export="svg">Image (SVG)</button>
+              <button data-export="report">Analysis report</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Body ---------------------------------------------------------- -->
+      <div class="body">
+        <!-- Left: explorer -->
+        <aside class="sidebar left">
+          <div class="panel-title">PROJECT EXPLORER</div>
+          <div id="explorer" class="explorer"></div>
+        </aside>
+
+        <!-- Center: graph -->
+        <main class="stage" id="stage">
+          <div class="mode-bar" id="modeBar"></div>
+
+          <div id="graph" class="graph"></div>
+
+          <!-- Floating controls -->
+          <div class="graph-controls bottom-left">
+            <div class="depth-control">
+              <span class="ctl-label">Depth</span>
+              <input type="range" id="depthSlider" min="0" max="6" step="1" value="0" />
+              <span class="depth-value" id="depthValue">Full</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="focusToggle" />
+              <span>Focus mode</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="edgeLabelToggle" />
+              <span>Edge labels</span>
+            </label>
+          </div>
+
+          <div class="graph-controls bottom-right zoom-controls">
+            <button class="zoom-btn" id="zoomIn">+</button>
+            <button class="zoom-btn" id="zoomOut">−</button>
+          </div>
+
+          <div class="status-strip" id="statusStrip"></div>
+
+          <!-- Empty / drop state -->
+          <div class="dropzone" id="dropOverlay">
+            <div class="dropzone-inner">
+              <div class="dropzone-icon"></div>
+              <div class="dropzone-title">Drop an RBXFlow file here</div>
+              <div class="dropzone-sub">or <button class="linkbtn" id="btnOpen2">choose a .json file</button></div>
+              <div class="dropzone-note">Exported by the Game Flow Scanner Studio plugin. Everything runs locally — nothing is uploaded.</div>
+            </div>
+          </div>
+          <div class="drag-hint" id="dragHint"><span>Release to load</span></div>
+        </main>
+
+        <!-- Right: inspector / overview / warnings -->
+        <aside class="sidebar right">
+          <div class="tabs" id="rightTabs">
+            <button class="tab active" data-tab="inspector">Inspector</button>
+            <button class="tab" data-tab="overview">Overview</button>
+            <button class="tab" data-tab="warnings">Warnings</button>
+          </div>
+          <div class="tab-panel active" data-panel="inspector">
+            <div id="inspector" class="inspector"></div>
+          </div>
+          <div class="tab-panel" data-panel="overview">
+            <div id="stats" class="stats"></div>
+          </div>
+          <div class="tab-panel" data-panel="warnings">
+            <div id="warnings" class="warnings"></div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Filters drawer -->
+      <div class="drawer" id="filtersDrawer">
+        <div class="drawer-head">
+          <span>Filters &amp; Legend</span>
+          <button class="icon-btn" id="closeFilters">✕</button>
+        </div>
+        <div class="drawer-body" id="filtersBody"></div>
+      </div>
+
+      <!-- Error toast -->
+      <div class="toast-wrap" id="toastWrap"></div>
+
+      <!-- Find-path banner -->
+      <div class="pathbar" id="pathbar">
+        <span id="pathbarText"></span>
+        <button class="btn btn-ghost small" id="pathCancel">Cancel</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
