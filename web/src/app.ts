@@ -33,6 +33,24 @@ import type { NodeKind } from "./model/types";
 
 const LS_LAYOUT = "rbxflow.layout";
 
+/** localStorage can throw in sandboxed/embedded browsers — access it safely. */
+const safeStorage = {
+  get(key: string): string | null {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  set(key: string, value: string): void {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      /* storage unavailable — layout choice just won't persist */
+    }
+  },
+};
+
 export class App {
   private model: ProjectModel | null = null;
   private graph!: GraphController;
@@ -61,7 +79,7 @@ export class App {
 
   init(): void {
     applyCssVars(getTheme());
-    this.layout = (localStorage.getItem(LS_LAYOUT) as LayoutId) || "hierarchical";
+    this.layout = (safeStorage.get(LS_LAYOUT) as LayoutId) || "hierarchical";
 
     this.graph = new GraphController($("#graph"), {
       onNodeSelect: (id) => this.handleNodeTap(id),
@@ -104,6 +122,15 @@ export class App {
 
   // ---- Loading ---------------------------------------------------------
   private async loadSample(): Promise<void> {
+    // Single-file builds (e.g. an embedded/offline distribution) can inline the
+    // sample as a global so no fetch is needed. Fall back to fetching it.
+    const embedded = (window as unknown as { __RBXFLOW_SAMPLE__?: RawDocument | string })
+      .__RBXFLOW_SAMPLE__;
+    if (embedded) {
+      const text = typeof embedded === "string" ? embedded : JSON.stringify(embedded);
+      await this.importer.loadTextAs(text, "sample-game.rbxflow.json");
+      return;
+    }
     try {
       const res = await fetch("./sample-game.rbxflow.json");
       if (!res.ok) return;
@@ -213,6 +240,7 @@ export class App {
     this.inspector.showNode(this.model, node);
     this.explorer.highlight(id);
     this.setTab("inspector");
+    this.revealInspectorOnMobile();
   }
 
   private selectEdge(id: string): void {
@@ -222,6 +250,7 @@ export class App {
     this.graph.selectEdge(id);
     this.inspector.showEdge(this.model, edge);
     this.setTab("inspector");
+    this.revealInspectorOnMobile();
   }
 
   private clearSelection(): void {
@@ -387,7 +416,7 @@ export class App {
     const layoutSel = $("#layoutSelect") as HTMLSelectElement;
     layoutSel.addEventListener("change", () => {
       this.layout = layoutSel.value as LayoutId;
-      localStorage.setItem(LS_LAYOUT, this.layout);
+      safeStorage.set(LS_LAYOUT, this.layout);
       this.graph.runLayout(this.layout);
     });
 
@@ -430,6 +459,11 @@ export class App {
       b.addEventListener("click", () => this.doExport(b.dataset.export!));
     }
 
+    // Mobile sidebar toggles.
+    $("#btnMenuLeft").addEventListener("click", () => this.toggleSidebar("left"));
+    $("#btnMenuRight").addEventListener("click", () => this.toggleSidebar("right"));
+    $("#scrim").addEventListener("click", () => this.closeSidebars());
+
     // Path bar cancel.
     $("#pathCancel").addEventListener("click", () => this.cancelFindPath());
 
@@ -444,6 +478,34 @@ export class App {
         ($("#searchInput") as HTMLInputElement).focus();
       }
     });
+  }
+
+  // ---- Mobile sidebars -------------------------------------------------
+  private get isMobile(): boolean {
+    return window.matchMedia("(max-width: 860px)").matches;
+  }
+
+  private toggleSidebar(side: "left" | "right"): void {
+    const target = $(`.sidebar.${side}`);
+    const other = $(`.sidebar.${side === "left" ? "right" : "left"}`);
+    other.classList.remove("open");
+    const willOpen = !target.classList.contains("open");
+    target.classList.toggle("open", willOpen);
+    $("#scrim").classList.toggle("active", willOpen);
+  }
+
+  private closeSidebars(): void {
+    $(".sidebar.left").classList.remove("open");
+    $(".sidebar.right").classList.remove("open");
+    $("#scrim").classList.remove("active");
+  }
+
+  /** After selecting on mobile, reveal the inspector so the result is visible. */
+  private revealInspectorOnMobile(): void {
+    if (!this.isMobile) return;
+    $(".sidebar.left").classList.remove("open");
+    $(".sidebar.right").classList.add("open");
+    $("#scrim").classList.add("active");
   }
 
   private resetView(): void {

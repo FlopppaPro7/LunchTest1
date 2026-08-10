@@ -10,6 +10,7 @@
     <div id="app">
       <!-- Top bar ------------------------------------------------------- -->
       <header class="topbar">
+        <button class="btn btn-ghost mobile-toggle" id="btnMenuLeft" title="Toggle explorer" aria-label="Toggle explorer">☰</button>
         <div class="brand">
           <span class="brand-mark"></span>
           <span class="brand-name">RBXFlow</span>
@@ -38,6 +39,7 @@
               <button data-export="report">Analysis report</button>
             </div>
           </div>
+          <button class="btn btn-ghost mobile-toggle" id="btnMenuRight" title="Toggle inspector" aria-label="Toggle inspector">ⓘ</button>
         </div>
       </header>
 
@@ -108,6 +110,9 @@
             <div id="warnings" class="warnings"></div>
           </div>
         </aside>
+
+        <!-- Mobile scrim: tap to close open sidebars -->
+        <div class="scrim" id="scrim"></div>
       </div>
 
       <!-- Filters drawer -->
