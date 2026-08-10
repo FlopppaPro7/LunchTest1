@@ -2,8 +2,15 @@
 node_modules/
 
 # Build output
-dist/
+web/dist/
 *.tsbuildinfo
+
+# Rojo plugin build artifacts (the committed single-file bundle in
+# plugin/dist/ is intentional and NOT ignored).
+*.rbxmx
+*.rbxm
+*.rbxl
+*.rbxlx
 
 # Logs
 *.log

@@ -26,8 +26,8 @@ one thing — a JSON contract:
 |--------------|-------------------------------------------------------------------|
 | `schema/`    | The `rbxflow` JSON contract — the single source of truth both sides target. |
 | `web/`       | RBXFlow web application (Vite + TypeScript + Cytoscape.js).       |
+| `plugin/`    | Game Flow Scanner Studio plugin (Luau, Rojo project + single-file build). |
 | `fixtures/`  | A realistic sample `rbxflow` file for developing/testing the web app. |
-| `plugin/`    | Game Flow Scanner Studio plugin (Luau) — *planned next milestone*. |
 
 ## Status
 
@@ -35,8 +35,10 @@ one thing — a JSON contract:
   6 graph modes, 6 layouts, explorer, inspector, search, filters, focus mode,
   path finding, depth control, statistics, warnings, and export
   (JSON / PNG / SVG / report).
-- ⏳ **Studio plugin** — schema and module architecture are designed
-  (see `schema/rbxflow.schema.md`); implementation is the next milestone.
+- ✅ **Studio plugin MVP** — read-only DataModel scan, static source analysis
+  (require / remotes / events / references / attributes), server/client/shared
+  classification, incremental scanning, and rbxflow JSON export. Ships as a
+  Rojo project and a paste-in single-file build. See [`plugin/`](plugin).
 
 ## Running the web app
 
